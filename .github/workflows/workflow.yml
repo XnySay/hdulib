@@ -23,9 +23,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run script with timeout
+      - name: Run demo script
         env:
           CONFIG: ${{ secrets.CONFIG }}
-        run: |
-          echo "Starting script..."
-          timeout 5m python main.py
+        run: python demo.py
+
+      - name: Run main script
+        env:
+          CONFIG: ${{ secrets.CONFIG }}
+        run: python main.py

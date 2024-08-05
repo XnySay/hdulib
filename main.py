@@ -15,24 +15,18 @@ from utils.hdulib import (
 )
 
 
-def log_task_info(idx: int, task: Task, seat_id: int):
-    if seat_id == 0:
-        print(
-            f"task_id: {idx} floor_id: {task.floor_id}, seat_number: {task.seat_number} is not found"
-        )
-    else:
-        print(
-            f"task_id: {idx} floor_id: {task.floor_id}, seat_number: {task.seat_number} seat_id: {seat_id}"
-        )
-
-
 def run(user: HDULIB):
     rooms = user.get_rooms_dict()
     for idx, task in enumerate(user.tasks):
         seat_id = get_seat_by_room_and_floor(rooms, task.floor_id, task.seat_number)
-        log_task_info(idx, task, seat_id)
         if seat_id == 0:
-            continue
+            print(
+                f"task_id: {idx} floor_id: {task.floor_id}, seat_number: {task.seat_number} is not found"
+            )
+        else:
+            print(
+                f"task_id: {idx} floor_id: {task.floor_id}, seat_number: {task.seat_number} seat_id: {seat_id}"
+            )
         if task.begin_time < dt.datetime.now().timestamp():
             print(f"task_id: {idx} begin_time 已调整到下一天")
             task.begin_time += int(dt.timedelta(days=1).total_seconds())
@@ -62,11 +56,11 @@ def run(user: HDULIB):
 
 def parse_config(config: str) -> User:
     config_dict = dict(re.findall(r"(\w+)\s*=\s*(\S+)", config))
-
+    print(config_dict)
     user_name = config_dict.get("user_name")
-    password = config_dict.get("PASSWORD")
-    floor_id = int(config_dict.get("floor_id"))
-    seat_number = int(config_dict.get("seat_number"))
+    password = config_dict.get("password")
+    floor_id = str(config_dict.get("floor_id"))
+    seat_number = str(config_dict.get("seat_number"))
     begin_time = int(config_dict.get("begin_time"))
     duration = int(config_dict.get("duration"))
     max_trials = int(config_dict.get("max_trials"))
@@ -75,7 +69,9 @@ def parse_config(config: str) -> User:
     task = Task(
         floor_id=floor_id,
         seat_number=seat_number,
-        begin_time=begin_time,
+        begin_time=(dt.datetime.now() + dt.timedelta(days=2))
+        .replace(hour=begin_time, minute=0, second=0, microsecond=0)
+        .timestamp(),
         duration=duration,
         max_trials=max_trials,
         interval=interval,

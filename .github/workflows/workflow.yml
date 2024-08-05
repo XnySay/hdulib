@@ -2,7 +2,7 @@ name: hdulib
 
 on:
   schedule:
-    - cron: "52 00 * * *"
+    - cron: "03 01 * * *"
   workflow_dispatch:
 
 jobs:

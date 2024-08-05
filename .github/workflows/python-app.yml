@@ -1,13 +1,9 @@
-name: Python application
+name: hdulib
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   schedule:
-    - cron: "22 21 * * *"
-
+    - cron: "35 21 * * *"
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -77,10 +77,14 @@ def parse_config(config: str) -> User:
     return User(user_name=user_name, password=password, tasks=[task])
 
 
-if __name__ == "__main__":
+def main():
     print(111)
 
     config = os.environ.get("CONFIG", "")
     print(config)
     user = HDULIB(parse_config(config))
     run(user)
+
+
+if __name__ == "__main__":
+    main()

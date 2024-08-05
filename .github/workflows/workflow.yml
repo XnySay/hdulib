@@ -23,11 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run demo script
-        env:
-          CONFIG: ${{ secrets.CONFIG }}
-        run: python demo.py
-
       - name: Run main script
         env:
           CONFIG: ${{ secrets.CONFIG }}

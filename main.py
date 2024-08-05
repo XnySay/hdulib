@@ -1,0 +1,90 @@
+import datetime as dt
+import os
+import re
+import time
+import traceback
+from typing import List
+
+from dateutil.relativedelta import relativedelta
+
+from utils.hdulib import (
+    HDULIB,
+    Task,
+    User,
+    get_seat_by_room_and_floor,
+)
+
+
+def log_task_info(idx: int, task: Task, seat_id: int):
+    if seat_id == 0:
+        print(
+            f"task_id: {idx} floor_id: {task.floor_id}, seat_number: {task.seat_number} is not found"
+        )
+    else:
+        print(
+            f"task_id: {idx} floor_id: {task.floor_id}, seat_number: {task.seat_number} seat_id: {seat_id}"
+        )
+
+
+def run(user: HDULIB):
+    rooms = user.get_rooms_dict()
+    for idx, task in enumerate(user.tasks):
+        seat_id = get_seat_by_room_and_floor(rooms, task.floor_id, task.seat_number)
+        log_task_info(idx, task, seat_id)
+        if seat_id == 0:
+            continue
+        if task.begin_time < dt.datetime.now().timestamp():
+            print(f"task_id: {idx} begin_time 已调整到下一天")
+            task.begin_time += int(dt.timedelta(days=1).total_seconds())
+
+        if dt.datetime.fromtimestamp(task.begin_time).day - 1 > dt.datetime.now().day:
+            if dt.datetime.now().hour < 20:
+                print("等待到20点开始执行")
+                time.sleep(
+                    (
+                        dt.datetime.now().replace(hour=20, minute=0, second=0)
+                        - dt.datetime.now()
+                    ).total_seconds()
+                )
+
+        for _ in range(task.max_trials):
+            try:
+                message = user.confirm_seat(
+                    task.begin_time, task.duration, user.uid, seat_id
+                )
+                if message == "ok":
+                    print(f"task_id: {idx} Seat reservation successful.")
+                    break
+            except Exception as e:
+                print(str(e) + "\n" + traceback.format_exc())
+            time.sleep(task.interval)
+
+
+def parse_config(config: str) -> User:
+    config_dict = dict(re.findall(r"(\w+)\s*=\s*(\S+)", config))
+
+    user_name = config_dict.get("user_name")
+    password = config_dict.get("PASSWORD")
+    floor_id = int(config_dict.get("floor_id"))
+    seat_number = int(config_dict.get("seat_number"))
+    begin_time = int(config_dict.get("begin_time"))
+    duration = int(config_dict.get("duration"))
+    max_trials = int(config_dict.get("max_trials"))
+    interval = int(config_dict.get("interval"))
+
+    task = Task(
+        floor_id=floor_id,
+        seat_number=seat_number,
+        begin_time=begin_time,
+        duration=duration,
+        max_trials=max_trials,
+        interval=interval,
+    )
+
+    return User(user_name=user_name, password=password, tasks=[task])
+
+
+if __name__ == "__main__":
+    config = os.environ.get("CONFIG", "")
+    user = HDULIB(parse_config(config))
+    run(user)

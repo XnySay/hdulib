@@ -83,8 +83,9 @@ def main():
     config = os.environ.get("CONFIG", "")
     print(config)
     user = HDULIB(parse_config(config))
-    run(user)
+    # run(user)
 
 
 if __name__ == "__main__":
+    print(222222222)
     main()

@@ -178,7 +178,7 @@ class HDULIB:
             _tojson=True,
         )
 
-        print(f"get_seat_data start, seat_id : {seat_id} {res['header']['title']}")
+        print(f"get_seat_data start, seat_id : {'seat_id'} {res['header']['title']}")
 
         return res
 
